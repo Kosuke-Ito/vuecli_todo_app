@@ -6,17 +6,17 @@
       <li 
         v-for="todo in todos"
         v-bind:key="todo.id">
-          <h3 v-on:click="showTodo(todo)">{{ todo.title }}</h3>
-          <div style="display:inline-block;" v-show="showingId === todo.id">
-            <form class="content">
-              <textarea type="text" style="display:block" ref="title" v-model="textInput" />
-              <div style="float: right;">
-                <button v-on:click="doEdit(textInput)">編集</button>
-                <button v-on:click="doRemove(todo)">削除</button>
-              </div>
-            </form>
-
-          </div>
+        <h3 v-on:click="showTodo(todo)">{{ todo.title }}</h3>
+          
+        <div style="display:inline-block;" v-show="showingId === todo.id">
+          <form class="content" v-on:submit.prevent="doEdit(textInput, todo)">
+            <textarea type="text" style="display:block" v-model.lazy="textInput"/>
+            <div style="float: right;">
+              <button type="submit">編集</button>
+              <button type="button" v-on:click="doRemove(todo)">削除</button>
+            </div>
+          </form>
+        </div>
       </li>
     </ul>
 
@@ -91,6 +91,11 @@
           this.showingId = todo.id
           this.textInput = todo.title + "\n" + todo.content
         }
+      },
+      doEdit: function (titleContent, todo) {
+        const [title, content] = titleContent.split('\n')
+        this.$set(this.todos[todo.id], 'title', title)
+        this.$set(this.todos[todo.id], 'content', content)
       }
     }
   }
