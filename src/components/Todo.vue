@@ -29,12 +29,11 @@
       </span>
     </button>
     <form class="add-form" v-on:submit.prevent="doAdd" v-show='toggle'>
-      <div class="form-list">タイトル<input type="text" ref="title"></div>
-      <div class="form-list">内容<input type="text" ref="content"></div>
+      <div class="form-list">タイトル<input type="text" v-model="newTask.title"></div>
+      <div class="form-list">内容<textarea type="text" v-model="newTask.content" /></div>
       <button type="submit">追加</button>
     </form>
   </div>
-
 
 </template>
 
@@ -42,7 +41,6 @@
   import { todoStorage } from './TodoStorage.js'
 
   export default {
-    // isShow: trueの時 コンテンツと編集と削除が表示される
     name: 'Todo',
     props: { todo_app_title: String },
     data: function () {
@@ -50,7 +48,11 @@
         todos: [],
         toggle: false,
         showingId: null,
-        textInput: ""
+        textInput: "",
+        newTask: {
+          title: "",
+          content: ""
+        }
       }
     },
     created() {
@@ -66,19 +68,17 @@
     },
     methods: {
       doAdd: function () {
-        const title = this.$refs.title
-        const content = this.$refs.content
-
-        if (!title.value.length || !content.value.length) {
+        const { title, content } = this.newTask
+        if (!title.length || !content.length) {
           return
         }
         this.todos.push({
           id: todoStorage.uid++,
-          title: title.value,
-          content: content.value,
+          title,
+          content,
         })
-        title.value = ""
-        content.value = ""
+        this.newTask.title = ""
+        this.newTask.content = ""
       },
       showTodo: function (todo) {
         // ひらいているかどうか
@@ -93,9 +93,14 @@
         }
       },
       doEdit: function (titleContent, todo) {
-        const [title, content] = titleContent.split('\n')
+        let [title, ...content] = titleContent.split('\n')
+
         this.$set(this.todos[todo.id], 'title', title)
-        this.$set(this.todos[todo.id], 'content', content)
+        this.$set(this.todos[todo.id], 'content', content.join('\n'))
+      },
+      doRemove: function (todo) {
+        const index = this.todos.indexOf(todo)
+        this.todos.splice(index, 1)
       }
     }
   }
@@ -140,7 +145,7 @@ li div p {
 }
 .toggle-form {
   margin: 1rem 0 0;
-  font-size: 1rem;
+  font-size: 2rem;
   color:cornflowerblue;
   width: 1.5rem;
   height: 1.5rem;
@@ -152,6 +157,15 @@ li div p {
 }
 .form-list{
   margin-bottom:.3rem;
+}
+.add-form  {
+  width: fit-content;
+}
+.add-form textarea {
+  margin: .5rem 0 0 .5rem;
+}
+.add-form button {
+  float:right;
 }
 input {
   margin-left: .5rem
