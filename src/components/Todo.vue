@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>{{ todo_app_title }}</h1>
+    <h1>{{ todoAppTitle }}</h1>
     <h2>タスク一覧</h2>
     <ul>
       <li 
@@ -20,15 +20,15 @@
       </li>
     </ul>
 
-    <button class="toggle-form" v-on:click='toggle = !toggle'>
-      <span v-if="!toggle">
+    <button class="toggle-form" v-on:click="openForm()">
+      <span v-if="!showingForm">
         +
       </span>
       <span v-else>
         x
       </span>
     </button>
-    <form class="add-form" v-on:submit.prevent="doAdd" v-show='toggle'>
+    <form class="add-form" v-on:submit.prevent="doAdd" v-show='showingForm'>
       <div class="form-list">タイトル<input type="text" v-model="newTask.title"></div>
       <div class="form-list">内容<textarea type="text" v-model="newTask.content" /></div>
       <button type="submit">追加</button>
@@ -38,72 +38,76 @@
 </template>
 
 <script>
-  import { todoStorage } from './TodoStorage.js'
+import { todoStorage } from '../TodoStorage.js'
 
-  export default {
-    name: 'Todo',
-    props: { todo_app_title: String },
-    data: function () {
-      return {
-        todos: [],
-        toggle: false,
-        showingId: null,
-        textInput: "",
-        newTask: {
-          title: "",
-          content: ""
-        }
-      }
-    },
-    created() {
-      this.todos = todoStorage.fetch()
-    },
-    watch: {
-      todos: {
-        handler: function(todos) {
-          todoStorage.save(todos)
-        },
-        deep: true
-      }
-    },
-    methods: {
-      doAdd: function () {
-        const { title, content } = this.newTask
-        if (!title.length || !content.length) {
-          return
-        }
-        this.todos.push({
-          id: todoStorage.uid++,
-          title,
-          content,
-        })
-        this.newTask.title = ""
-        this.newTask.content = ""
-      },
-      showTodo: function (todo) {
-        // ひらいているかどうか
-        const isCurrentTodoExpanded = this.showingId === todo.id
-        if (isCurrentTodoExpanded) {
-          // 開いていたら閉じる
-          this.showingId = null
-        } else {
-          // 閉じていたら開く
-          this.showingId = todo.id
-          this.textInput = todo.title + "\n" + todo.content
-        }
-      },
-      doEdit: function (titleContent, todo) {
-        let [title, ...content] = titleContent.split('\n')
-
-        this.$set(this.todos[todo.id], 'title', title)
-        this.$set(this.todos[todo.id], 'content', content.join('\n'))
-      },
-      doRemove: function (todo) {
-        const index = this.todos.indexOf(todo)
-        this.todos.splice(index, 1)
+export default {
+  name: 'Todo',
+  props: { todoAppTitle: String },
+  data: function () {
+    return {
+      todos: [],
+      showingForm: false,
+      showingId: null,
+      textInput: "",
+      newTask: {
+        title: "",
+        content: ""
       }
     }
+  },
+  created() {
+    this.todos = todoStorage.fetch()
+  },
+  watch: {
+    todos: {
+      handler: function(todos) {
+        todoStorage.save(todos)
+      },
+      deep: true
+    }
+  },
+  methods: {
+    openForm: function () {
+      this.showingForm = !(this.showingForm)
+    },
+    doAdd: function () {
+      const { title, content } = this.newTask
+      if (!title.length || !content.length) {
+        return
+      }
+      this.todos.push({
+        id: todoStorage.uid++,
+        title,
+        content,
+      })
+      this.newTask.title = ""
+      this.newTask.content = ""
+    },
+    showTodo: function (todo) {
+      // ひらいているかどうか
+      const isCurrentTodoExpanded = this.showingId === todo.id
+      if (isCurrentTodoExpanded) {
+        // 開いていたら閉じる
+        this.showingId = null
+      } else {
+        // 閉じていたら開く
+        this.showingId = todo.id
+        this.textInput = todo.title + "\n" + todo.content
+      }
+    },
+    doEdit: function (titleContent, todo) {
+      let [title, ...content] = titleContent.split('\n')
+
+      this.$set(this.todos[todo.id], 'title', title)
+      this.$set(this.todos[todo.id], 'content', content.join('\n'))
+      this.showingId = null
+    },
+    doRemove: function (todo) {
+      const index = this.todos.indexOf(todo)
+      this.todos.splice(index, 1)
+    }
   }
+}
 </script>
 
 <style scoped>

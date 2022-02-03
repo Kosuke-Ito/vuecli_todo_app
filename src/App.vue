@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Todo todo_app_title="MY TODO LIST"/>
+    <Todo todo-app-title="MY TODO LIST"/>
   </div>
 </template>
 
