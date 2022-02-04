@@ -96,7 +96,7 @@ export default {
       }
     },
     doEdit: function (titleContent, todo) {
-      let [title, ...content] = titleContent.split('\n')
+      const [title, ...content] = titleContent.split('\n')
 
       this.$set(this.todos[todo.id], 'title', title)
       this.$set(this.todos[todo.id], 'content', content.join('\n'))
